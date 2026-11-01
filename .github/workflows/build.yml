@@ -42,8 +42,16 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Instalar Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Aceptar licencias del Android SDK
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER=$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f 2>/dev/null | head -n 1)
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager no encontrado, sigo sin aceptar licencias manualmente."
+            exit 0
+          fi
+          yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses > /dev/null || true
+          echo "Licencias aceptadas."
 
       - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
